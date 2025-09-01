@@ -1,4 +1,4 @@
-# FinanceFlow — Personal Finance App
+# Finity — Personal Finance App
 
 A lightweight personal finance tracking web app with a FastAPI backend and a React + Vite TypeScript frontend. Features include transaction management, receipts OCR parsing, reporting (daily/monthly/forecast), and a responsive dashboard.
 
