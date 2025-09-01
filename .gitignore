@@ -1,0 +1,109 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+.venv
+
+app.db
+
+
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.env
+
+
+# General
+.DS_Store
+*.local
+*.log
+logs/
+*.log.*
+
+# Secrets / env
+.env
+.env.*
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.python-version
+pyvenv.cfg
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+.venv/*
+pip-wheel-metadata/
+pip-log.txt
+
+# Byte-compiled / compiled extensions
+*.so
+*.egg-info/
+.eggs/
+
+# Distribution / packaging / build
+build/
+dist/
+dist-ssr/
+parts/
+wheels/
+share/python-wheels/
+
+# Test / coverage / type checking
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+.pytest_cache/
+.mypy_cache/
+coverage.xml
+nosetests.xml
+
+# Database files
+app.db
+*.sqlite
+*.sqlite3
+*.db
+
+# Node / JS (preserve existing)
+node_modules/
+dist-ssr/
+
+# Editors / IDEs
+.vscode/
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Misc
+*.pyc
+*.pyo
+*.pyd
