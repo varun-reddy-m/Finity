@@ -74,11 +74,16 @@ A lightweight personal finance tracking web app with a FastAPI backend and a Rea
    pip install -r requirements.txt
    ```
 4. Configure `.env` in `backend/` (see Environment & configuration).
-5. Start the dev server:
+5. ENV EXAMPLE: SUPABASE_URL=
+SUPABASE_ANON_KEY=
+SUPABASE_BUCKET=
+GEMINI_API_KEY=
+DATABASE_URL=
+6. Start the dev server:
    ```sh
    uvicorn app.main:app --reload --port 8000
    ```
-6. API docs: http://localhost:8000/docs or http://localhost:8000/redoc
+7. API docs: http://localhost:8000/docs or http://localhost:8000/redoc
 
 ### Frontend
 1. Open a separate terminal and change into the frontend folder:
