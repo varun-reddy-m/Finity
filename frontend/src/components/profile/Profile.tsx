@@ -3,7 +3,7 @@ import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
-import { fetchUserData, updateUser } from '../../utils/apiClient';
+import { fetchUserData, updateUser, fetchCategories, addCategory as addCategoryApi } from '../../utils/apiClient';
 
 export function Profile() {
   // State for user data
@@ -13,6 +13,9 @@ export function Profile() {
     financialYearStart: 'january',
   });
   const [saving, setSaving] = useState(false); // State for save button
+  const [newCategory, setNewCategory] = useState('');
+  const [addingCategory, setAddingCategory] = useState(false);
+  const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
 
   // Fetch user data on component mount
   useEffect(() => {
@@ -25,6 +28,12 @@ export function Profile() {
         });
       })
       .catch((error) => console.error('Error fetching user data:', error));
+  }, []);
+
+  useEffect(() => {
+    fetchCategories()
+      .then((data) => setCategories(data))
+      .catch((error) => console.error('Error fetching categories:', error));
   }, []);
 
   const handleInputChange = (key: keyof typeof userData) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -41,6 +50,23 @@ export function Profile() {
       console.error('Error updating user data:', error);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const addCategory = async () => {
+    const name = newCategory.trim();
+    if (!name) return;
+    setAddingCategory(true);
+    try {
+      const response = await addCategoryApi(name); // Ensure the payload matches the API contract
+      setNewCategory('');
+      setCategories((prev) => [...prev, response]); // Update categories with the new category
+      alert('Category added successfully');
+    } catch (error) {
+      console.error('Error adding category:', error);
+      alert('Failed to add category');
+    } finally {
+      setAddingCategory(false);
     }
   };
 
@@ -63,7 +89,7 @@ export function Profile() {
               label="Email"
               type="email"
               value={userData.email}
-              readOnly // Make email non-editable
+              readOnly 
             />
           </div>
 
@@ -91,6 +117,31 @@ export function Profile() {
           </div>
         </div>
       </Card>
+
+      <div className="space-y-4 mt-6">
+        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">Categories</h3>
+        <div className="flex items-center mt-3">
+          <Input
+            value={newCategory}
+            onChange={(e) => setNewCategory(e.target.value)}
+            placeholder="New category"
+          />
+          <Button onClick={addCategory} className="ml-2" disabled={addingCategory}>
+            {addingCategory ? 'Adding...' : '+ Add'}
+          </Button>
+        </div>
+        {categories.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {categories.map((category) => (
+              <Card key={category.id}>
+                <p className="text-gray-800 dark:text-gray-200">{category.name}</p>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500">No categories available.</p>
+        )}
+      </div>
     </div>
   );
 }

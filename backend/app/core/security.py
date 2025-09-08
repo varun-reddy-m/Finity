@@ -46,7 +46,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
         )
-    # Fetch the user's ID using their email
+    # Fetch the user's email
     db = SessionLocal()
     user = db.execute(select(User).where(User.email == email)).scalars().first()
     db.close()
@@ -55,4 +55,4 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found",
         )
-    return user.id  # Return the user's numeric ID
+    return user.email  # Return the user's email

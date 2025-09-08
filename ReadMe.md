@@ -67,7 +67,7 @@ A lightweight personal finance tracking web app with a FastAPI backend and a Rea
    - Windows (PowerShell):
      ```ps1
      python -m venv .venv
-     .\.venv\Scripts\Activate.ps1
+     .\.venv\Scripts\Activate.bat
      ```
 3. Install dependencies (if `requirements.txt` exists):
    ```sh

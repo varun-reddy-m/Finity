@@ -9,6 +9,7 @@ from app.db.session import SessionLocal
 from app.core.security import get_current_user
 from app.models.transaction import Transaction  # SQLModel/ORM
 from app.models.category import Category  # SQLModel/ORM
+from app.models.user import User  # SQLModel/ORM
 
 router = APIRouter()
 
@@ -110,6 +111,11 @@ def create_transaction(
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
 ):
+    # Resolve user_id from email
+    user = db.execute(select(User).where(User.email == current_user)).scalars().first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
     data = body.dict(exclude_unset=True)
 
     # Validate required fields
@@ -130,14 +136,11 @@ def create_transaction(
     # Ensure datetime fields are Python datetimes (naive UTC)
     _coerce_datetime_fields(data)
 
-    # Log the incoming data for debugging
-    print("Incoming transaction data:", data)
-
     obj = Transaction(**data)
 
     # Enforce ownership & timestamps server-side
     if hasattr(obj, "user_id"):
-        obj.user_id = current_user
+        obj.user_id = user.id
     _stamp_created(obj)
     _stamp_updated(obj)
 
@@ -158,11 +161,16 @@ def list_transactions(
     page: int = 1,
     per_page: int = 15,  # Updated default per_page to 15
 ):
+    # Resolve user_id from email
+    user = db.execute(select(User).where(User.email == current_user)).scalars().first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
     # Guardrails for pagination
     page = max(1, page)
     per_page = max(1, min(per_page, 100))
 
-    stmt = select(Transaction).where(Transaction.user_id == current_user)
+    stmt = select(Transaction).where(Transaction.user_id == user.id)
 
     if start_date:
         stmt = stmt.where(Transaction.date >= _to_naive_utc(start_date))
@@ -204,9 +212,14 @@ def get_transaction(
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
 ):
+    # Resolve user_id from email
+    user = db.execute(select(User).where(User.email == current_user)).scalars().first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
     stmt = select(Transaction).where(
         Transaction.id == transaction_id,
-        Transaction.user_id == current_user,
+        Transaction.user_id == user.id,
     )
     row = _first(db, stmt)
     if not row:
@@ -221,6 +234,11 @@ def update_transaction(
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
 ):
+    # Resolve user_id from email
+    user = db.execute(select(User).where(User.email == current_user)).scalars().first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
     incoming = body.dict(exclude_unset=True)
 
     # Validate required fields
@@ -232,7 +250,7 @@ def update_transaction(
     # Fetch scoped to owner
     stmt = select(Transaction).where(
         Transaction.id == transaction_id,
-        Transaction.user_id == current_user,
+        Transaction.user_id == user.id,
     )
     row = _first(db, stmt)
     if not row:
@@ -243,7 +261,7 @@ def update_transaction(
 
     # Reassert ownership
     if hasattr(row, "user_id"):
-        row.user_id = current_user
+        row.user_id = user.id
 
     _stamp_updated(row)
 
@@ -259,9 +277,14 @@ def delete_transaction(
     db: Session = Depends(get_db),
     current_user: str = Depends(get_current_user),
 ):
+    # Resolve user_id from email
+    user = db.execute(select(User).where(User.email == current_user)).scalars().first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
     stmt = select(Transaction).where(
         Transaction.id == transaction_id,
-        Transaction.user_id == current_user,
+        Transaction.user_id == user.id,
     )
     row = _first(db, stmt)
     if not row:

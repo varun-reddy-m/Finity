@@ -10,6 +10,7 @@ from datetime import datetime, timedelta, date
 from app.core.security import get_current_user
 from app.db.session import SessionLocal
 from app.models.transaction import Transaction
+from app.models.user import User
 
 # Optional Category model (name lookup for pie charts)
 try:
@@ -100,6 +101,11 @@ def series_daily(
     Line/area chart over last `days` (default 30).
     Returns per-day income (>=0), expense (>=0), and net = income - expense.
     """
+    # Resolve user_id from email
+    user = db.execute(select(User).where(User.email == current_user)).scalars().first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
     end_d = _today()
     start_d = end_d - timedelta(days=days - 1)
 
@@ -110,7 +116,7 @@ def series_daily(
     stmt = (
         select(day_label, inc_sum, exp_sum)
         .where(
-            Transaction.user_id == current_user,
+            Transaction.user_id == user.id,
             Transaction.date >= _start_of_day(start_d),
             Transaction.date <= _end_of_day(end_d),
         )

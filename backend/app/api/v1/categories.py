@@ -58,7 +58,12 @@ def list_categories(
     """
     List categories owned by the current user.
     """
-    stmt = select(Category).where(Category.user_id == current_user)
+    # Resolve user_id from email
+    user = db.execute(select(User).where(User.email == current_user)).scalars().first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    stmt = select(Category).where(Category.user_id == user.id)
     rows = db.exec(stmt).all() if hasattr(db, "exec") else db.execute(stmt).scalars().all()
     return rows
 
@@ -72,9 +77,14 @@ def get_category(
     """
     Get a single category owned by the current user.
     """
+    # Resolve user_id from email
+    user = db.execute(select(User).where(User.email == current_user)).scalars().first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
     stmt = select(Category).where(
         Category.id == category_id,
-        Category.user_id == current_user,
+        Category.user_id == user.id,
     )
     row = db.exec(stmt).first() if hasattr(db, "exec") else db.execute(stmt).scalars().first()
     if not row:
