@@ -7,7 +7,7 @@ from sqlmodel import Session, select
 from app.db.session import SessionLocal
 from app.core.security import get_current_user
 from app.models.category import Category  # SQLModel ORM
-from app.models.user import User  # Import User model
+from app.models.user import user  # Import User model
 
 router = APIRouter()
 
@@ -59,11 +59,11 @@ def list_categories(
     List categories owned by the current user.
     """
     # Resolve user_id from email
-    user = db.execute(select(User).where(User.email == current_user)).scalars().first()
-    if not user:
+    user_record = db.execute(select(user).where(user.email == current_user)).scalars().first()
+    if not user_record:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
-    stmt = select(Category).where(Category.user_id == user.id)
+    stmt = select(Category).where(Category.user_id == user_record.id)
     rows = db.exec(stmt).all() if hasattr(db, "exec") else db.execute(stmt).scalars().all()
     return rows
 
@@ -78,13 +78,13 @@ def get_category(
     Get a single category owned by the current user.
     """
     # Resolve user_id from email
-    user = db.execute(select(User).where(User.email == current_user)).scalars().first()
-    if not user:
+    user_record = db.execute(select(user).where(user.email == current_user)).scalars().first()
+    if not user_record:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
     stmt = select(Category).where(
         Category.id == category_id,
-        Category.user_id == user.id,
+        Category.user_id == user_record.id,
     )
     row = db.exec(stmt).first() if hasattr(db, "exec") else db.execute(stmt).scalars().first()
     if not row:
@@ -112,10 +112,10 @@ def create_category(
     # Enforce ownership and timestamps server-side
     if hasattr(obj, "user_id"):
         # Fetch the user's ID using their email
-        user = db.execute(select(User).where(User.email == current_user)).scalars().first()
-        if not user:
+        user_record = db.execute(select(user).where(user.email == current_user)).scalars().first()
+        if not user_record:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-        obj.user_id = user.id  # Assign the numeric user ID
+        obj.user_id = user_record.id  # Assign the numeric user ID
     if hasattr(obj, "created_at") and getattr(obj, "created_at", None) is None:
         obj.created_at = datetime.now(timezone.utc)
     if hasattr(obj, "updated_at"):

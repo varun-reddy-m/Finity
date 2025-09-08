@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.engine.url import URL
 import os
 from app.models.transaction import Transaction
-from app.models.receipt import Receipt
+from app.models.receipt import receipt
 
 
 # Update DATABASE_URL to use Supabase connection string

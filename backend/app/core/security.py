@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, HTTPException, status
 from app.db.session import SessionLocal
-from app.models.user import User
+from app.models.user import user
 from sqlmodel import select
 
 # Password hashing
@@ -48,11 +48,11 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         )
     # Fetch the user's email
     db = SessionLocal()
-    user = db.execute(select(User).where(User.email == email)).scalars().first()
+    user_record = db.execute(select(user).where(user.email == email)).scalars().first()
     db.close()
-    if not user:
+    if not user_record:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found",
         )
-    return user.email  # Return the user's email
+    return user_record.email  # Return the user's email

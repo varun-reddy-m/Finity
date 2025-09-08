@@ -9,7 +9,7 @@ from app.db.session import SessionLocal
 from app.core.security import get_current_user
 from app.models.transaction import Transaction  # SQLModel/ORM
 from app.models.category import Category  # SQLModel/ORM
-from app.models.user import User  # SQLModel/ORM
+from app.models.user import user  # SQLModel/ORM
 
 router = APIRouter()
 
@@ -112,8 +112,8 @@ def create_transaction(
     current_user: str = Depends(get_current_user),
 ):
     # Resolve user_id from email
-    user = db.execute(select(User).where(User.email == current_user)).scalars().first()
-    if not user:
+    user_record = db.execute(select(user).where(user.email == current_user)).scalars().first()
+    if not user_record:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
     data = body.dict(exclude_unset=True)
@@ -140,7 +140,7 @@ def create_transaction(
 
     # Enforce ownership & timestamps server-side
     if hasattr(obj, "user_id"):
-        obj.user_id = user.id
+        obj.user_id = user_record.id
     _stamp_created(obj)
     _stamp_updated(obj)
 
@@ -162,15 +162,15 @@ def list_transactions(
     per_page: int = 15,  # Updated default per_page to 15
 ):
     # Resolve user_id from email
-    user = db.execute(select(User).where(User.email == current_user)).scalars().first()
-    if not user:
+    user_record = db.execute(select(user).where(user.email == current_user)).scalars().first()
+    if not user_record:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
     # Guardrails for pagination
     page = max(1, page)
     per_page = max(1, min(per_page, 100))
 
-    stmt = select(Transaction).where(Transaction.user_id == user.id)
+    stmt = select(Transaction).where(Transaction.user_id == user_record.id)
 
     if start_date:
         stmt = stmt.where(Transaction.date >= _to_naive_utc(start_date))
@@ -213,13 +213,13 @@ def get_transaction(
     current_user: str = Depends(get_current_user),
 ):
     # Resolve user_id from email
-    user = db.execute(select(User).where(User.email == current_user)).scalars().first()
-    if not user:
+    user_record = db.execute(select(user).where(user.email == current_user)).scalars().first()
+    if not user_record:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
     stmt = select(Transaction).where(
         Transaction.id == transaction_id,
-        Transaction.user_id == user.id,
+        Transaction.user_id == user_record.id,
     )
     row = _first(db, stmt)
     if not row:
@@ -235,8 +235,8 @@ def update_transaction(
     current_user: str = Depends(get_current_user),
 ):
     # Resolve user_id from email
-    user = db.execute(select(User).where(User.email == current_user)).scalars().first()
-    if not user:
+    user_record = db.execute(select(user).where(user.email == current_user)).scalars().first()
+    if not user_record:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
     incoming = body.dict(exclude_unset=True)
@@ -250,7 +250,7 @@ def update_transaction(
     # Fetch scoped to owner
     stmt = select(Transaction).where(
         Transaction.id == transaction_id,
-        Transaction.user_id == user.id,
+        Transaction.user_id == user_record.id,
     )
     row = _first(db, stmt)
     if not row:
@@ -261,7 +261,7 @@ def update_transaction(
 
     # Reassert ownership
     if hasattr(row, "user_id"):
-        row.user_id = user.id
+        row.user_id = user_record.id
 
     _stamp_updated(row)
 
@@ -278,13 +278,13 @@ def delete_transaction(
     current_user: str = Depends(get_current_user),
 ):
     # Resolve user_id from email
-    user = db.execute(select(User).where(User.email == current_user)).scalars().first()
-    if not user:
+    user_record = db.execute(select(user).where(user.email == current_user)).scalars().first()
+    if not user_record:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
     stmt = select(Transaction).where(
         Transaction.id == transaction_id,
-        Transaction.user_id == user.id,
+        Transaction.user_id == user_record.id,
     )
     row = _first(db, stmt)
     if not row:

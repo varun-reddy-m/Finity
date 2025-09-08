@@ -61,10 +61,10 @@ export function Profile() {
       const response = await addCategoryApi(name); // Ensure the payload matches the API contract
       setNewCategory('');
       setCategories((prev) => [...prev, response]); // Update categories with the new category
-      alert('Category added successfully');
+      //alert('Category added successfully');
     } catch (error) {
       console.error('Error adding category:', error);
-      alert('Failed to add category');
+      //alert('Failed to add category');
     } finally {
       setAddingCategory(false);
     }

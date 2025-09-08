@@ -15,7 +15,7 @@ interface DashboardProps {
 
 export function Dashboard({ onNavigate }: DashboardProps) {
   const { chartData, categoryData, insights } = useFinanceData(); 
-  const { transactions, setTransactions, userCurrency } = useApp(); 
+  const { transactions, setTransactions } = useApp(); 
 
   useEffect(() => {
     const loadTransactionsWithCategories = async () => {

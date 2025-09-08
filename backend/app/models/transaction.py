@@ -14,4 +14,4 @@ class Transaction(SQLModel, table=True):
     notes: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
-    merchant: str = Field(nullable=False) 
+    merchant: str = Field(nullable=False)

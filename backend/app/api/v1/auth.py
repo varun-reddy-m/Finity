@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Request
 from pydantic import BaseModel
 from app.core.security import hash_password, verify_password, create_access_token, get_current_user, decode_access_token
 from datetime import timedelta
-from app.models.user import User as UserModel
+from app.models.user import user as UserModel
 from app.db.session import SessionLocal
 from sqlmodel import Session
 from typing import Optional
